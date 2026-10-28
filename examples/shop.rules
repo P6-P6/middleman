@@ -1,0 +1,122 @@
+# Demo rules for the middleman.
+# Anything not written in this file is impossible for every requester.
+
+database shop.db
+audit    audit.db
+
+levels
+  0 public
+  1 basic
+  2 sensitive
+  3 restricted
+
+# Every column in a guarded table must have a level, or the middleman will not start.
+table customers
+  id          level 0
+  first_name  level 1
+  last_name   level 1
+  email       level 1
+  zip         level 1
+  birthdate   level 1
+  phone       level 2
+  ssn         level 3
+  notes       level 1
+  together zip + birthdate level 2
+
+table tickets
+  id           level 0
+  customer_id  level 0
+  body         level 1
+  created      level 0
+
+# An AI assistant connected through Claude Code.
+requester support-agent
+  key-sha256  056e08b87328c0ab1b6f7e4bbf6c5ece5898ca074cdd9a056ac45ed658555cbd
+  machines    any
+  clearance   1
+  reasons     support
+  budget      calls 30 per minute
+  budget      rows 200 per hour
+
+# A billing system.
+requester billing-app
+  key-sha256  605b62efdafad6dd7dad37ed82e831ed4f97437802b9a44209d48c91e369e60c
+  machines    any
+  clearance   2
+  reasons     invoice, refund
+  budget      calls 120 per minute
+
+# A person who audits the data, allowed only from this one machine.
+requester compliance-officer
+  key-sha256  f07d7b70cea9364f97ab6908fb78ff1e30fc178cc2745677e9197cb9f8ddd98b
+  machines    RYZEN-964
+  clearance   3
+  reasons     audit
+  budget      calls 20 per hour
+
+action find_customer
+  about    Find customers by last name.
+  kind     read
+  table    customers
+  input    last_name: text name max 40
+  where    last_name = last_name
+  returns  id, first_name, last_name, zip
+  order    id asc
+  rows     5
+  reasons  support, invoice, refund, audit
+
+action read_customer
+  about    Read one customer record by id.
+  kind     read
+  table    customers
+  input    customer_id: integer 1..999999
+  where    id = customer_id
+  returns  first_name, last_name, email, zip, birthdate, phone, ssn, notes
+  mask     phone last 2
+  mask     ssn last 4
+  rows     1
+  reasons  support, invoice, refund, audit
+
+# Filtering by ssn reveals things about it, so only clearance 3 is offered this.
+action find_by_ssn
+  about    Find a customer by full Social Security number.
+  kind     read
+  table    customers
+  input    ssn: text code max 11
+  where    ssn = ssn
+  returns  id, first_name, last_name
+  rows     1
+  reasons  audit
+
+action recent_tickets
+  about    List the ten newest support tickets.
+  kind     read
+  table    tickets
+  returns  id, customer_id, body, created
+  order    id desc
+  rows     10
+  reasons  support, audit
+
+action open_ticket
+  about    Open a support ticket for a customer.
+  kind     insert
+  table    tickets
+  input    customer_id: integer 1..999999
+  input    body: text line max 500
+  set      customer_id = customer_id
+  set      body = body
+  reasons  support
+  confirm  yes
+
+# Phone is level 2, so the support agent, at clearance 1, is never offered this.
+action update_phone
+  about    Change a customer's phone number.
+  kind     update
+  table    customers
+  input    customer_id: integer 1..999999
+  input    phone: text phone max 20
+  where    id = customer_id
+  set      phone = phone
+  rows     1
+  reasons  refund, support
+  confirm  yes

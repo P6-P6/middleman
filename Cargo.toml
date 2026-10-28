@@ -1,0 +1,19 @@
+[package]
+name = "middleman"
+version = "0.1.0"
+edition = "2021"
+description = "A gatekeeper that rips up every data request and rebuilds it from an approved menu."
+license = "PolyForm-Noncommercial-1.0.0 OR PolyForm-Small-Business-1.0.0"
+
+[dependencies]
+serde = "1"
+serde_json = { version = "1", features = ["preserve_order"] }
+rusqlite = { version = "0.37", features = ["bundled", "hooks"] }
+sha2 = "0.10"
+gethostname = "0.5"
+
+[profile.release]
+opt-level = 3
+lto = true
+codegen-units = 1
+panic = "abort"

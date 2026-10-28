@@ -1,0 +1,7 @@
+DEMO KEYS ONLY. These are for the demo rules in shop.rules. Never reuse them.
+To make a real key, generate a long random string, then run:  middleman hash-key
+and paste the printed hash into the requester's key-sha256 line.
+
+support-agent       demo-support-agent-c880cdaf31f993b879a5d84d65c563cf
+billing-app         demo-billing-app-1140fb02a9e01dbd16a9169c103ba360
+compliance-officer  demo-compliance-officer-2bed04d352d591ca0842006f90de3c94

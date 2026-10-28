@@ -1,0 +1,11 @@
+{
+  "mcpServers": {
+    "middleman": {
+      "command": "C:\\Users\\Ryzen9\\middleman\\target\\release\\middleman.exe",
+      "args": ["serve", "C:\\Users\\Ryzen9\\middleman\\examples\\shop.rules"],
+      "env": {
+        "MIDDLEMAN_KEY": "demo-support-agent-c880cdaf31f993b879a5d84d65c563cf"
+      }
+    }
+  }
+}
